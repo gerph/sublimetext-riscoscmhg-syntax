@@ -1,0 +1,104 @@
+%YAML 1.2
+---
+# RISC OS 'C Module Header Generator' ('CMHG') syntax colouring mode.
+#
+# Intended for use with CMHG files used for creating veneers and entry
+# points for C modules in RISC OS.
+#
+
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: RISCOS CMHG
+file_extensions: []
+scope: source.riscos-cmhg
+
+contexts:
+  # The prototype context is prepended to all contexts but those setting
+  # meta_include_prototype: false.
+  prototype:
+    - include: comments
+
+  main:
+    # The main context is the initial starting point of our syntax.
+    # Include other contexts from here (or specify them directly).
+    - include: keywords
+    - include: numbers
+    - include: strings
+    - include: preprocessor
+    - include: parameters
+
+  keywords:
+    # Declarations: Flags:
+    - match: '^(module-is-runnable|module-is-not-reentrant|module-is-c-plus-plus)(:)'
+      captures:
+        '1': keyword.control.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+    ## Declarations: Strings:
+    - match: '(title-string|help-string|international-help-file|date-string|international-help-file)(:)'
+      captures:
+        '1': keyword.control.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+    ## Declarations: Hex:
+    - match: "^(swi-chunk-base-number|error-base|error-chunk-base-number)(:)"
+      captures:
+        '1': keyword.control.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+    ## Declarations: Symbols:
+    - match: "^(initialisation-code|finalisation-code|swi-handler-code|swi-decoding-code|library-enter-code|library-initialisation-code)(:)"
+      captures:
+        '1': keyword.control.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+    ## Declarations: Names:
+    - match: "^(swi-decoding-table|error-identifiers|command-keyword-table|service-call-handler)(:)"
+      captures:
+        '1': keyword.control.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+    ## Declarations: Symbol pairs:
+    - match: "^(generic-veneers|irq-handlers|vector-handlers|vector-traps|event-handler)(:)"
+      captures:
+        '1': keyword.control.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+  parameters:
+    ## Parameters within the commands
+    - match: "(private-word|carry-capable|error-capable|min-args|max-args|gstrans-map|fs-command|international|add-syntax|configure|status|help|invalid-syntax|help-text|handler|no-handler)(:)"
+      captures:
+        '1': entity.other.attribute-name.riscos-cmhg
+        '2': punctuation.separator.key-value.riscos-cmhg
+
+  preprocessor:
+    ## Preprocessor
+    - match: "^(# *)(define |include |ifn?def |endif|elif |else|if )"
+      scope: meta.preprocessor.riscos-cmhg keyword.other.preprocessor.riscos-cmhg
+
+  numbers:
+    - match: '\b(-)?[0-9.]+|((&|0x)[0-9a-fA-f]{1,8})\b'
+      scope: constant.numeric.riscos-cmhg
+
+  strings:
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character.
+    - match: '"'
+      scope: punctuation.definition.string.begin.riscos-cmhg
+      push: inside_string
+
+  inside_string:
+    - meta_include_prototype: false
+    - meta_scope: string.quoted.double.riscos-cmhg
+    - match: '"'
+      scope: punctuation.definition.string.end.riscos-cmhg
+      pop: true
+
+  comments:
+    # Comments begin with a ';' and finish at the end of the line.
+    - match: ';'
+      scope: punctuation.definition.comment.riscos-cmhg
+      push:
+        # This is an anonymous context push for brevity.
+        - meta_scope: comment.line.semi-colon.riscos-cmhg
+        - match: $\n?
+          pop: true
